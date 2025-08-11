@@ -1,4 +1,3 @@
-// internal/ai/provider/openai/chat.go
 package openai
 
 import (
