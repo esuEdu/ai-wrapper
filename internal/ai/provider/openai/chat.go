@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/esuEdu/ai-wrapper/internal/ai"
 )
@@ -58,59 +57,6 @@ type openAIStreamResponse struct {
 		} `json:"delta"`
 		FinishReason *string `json:"finish_reason"`
 	} `json:"choices"`
-}
-
-// Chat sends a chat completion request
-func (c *Client) Chat(ctx context.Context, req *ai.ChatRequest) (*ai.ChatResponse, error) {
-	// Convert to OpenAI format
-	openAIReq := &openAIChatRequest{
-		Model:       req.Model,
-		MaxTokens:   req.MaxTokens,
-		Temperature: req.Temperature,
-		Stream:      false,
-	}
-
-	// Set default model if not specified
-	if openAIReq.Model == "" {
-		openAIReq.Model = "gpt-3.5-turbo"
-	}
-
-	// Convert messages
-	for _, msg := range req.Messages {
-		openAIReq.Messages = append(openAIReq.Messages, openAIMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
-		})
-	}
-
-	// Make request
-	resp, err := c.makeRequest(ctx, "POST", "/chat/completions", openAIReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Parse response
-	var openAIResp openAIChatResponse
-	if err := json.NewDecoder(resp.Body).Decode(&openAIResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	if len(openAIResp.Choices) == 0 {
-		return nil, fmt.Errorf("no choices in response")
-	}
-
-	return &ai.ChatResponse{
-		ID:      openAIResp.ID,
-		Model:   openAIResp.Model,
-		Content: openAIResp.Choices[0].Message.Content,
-		Usage: ai.Usage{
-			PromptTokens:     openAIResp.Usage.PromptTokens,
-			CompletionTokens: openAIResp.Usage.CompletionTokens,
-			TotalTokens:      openAIResp.Usage.TotalTokens,
-		},
-		Created: time.Unix(openAIResp.Created, 0),
-	}, nil
 }
 
 // ChatStream sends a streaming chat completion request

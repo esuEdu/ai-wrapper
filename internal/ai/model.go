@@ -1,4 +1,3 @@
-// internal/ai/model.go
 package ai
 
 import (
@@ -47,9 +46,6 @@ type StreamResponse struct {
 
 // Provider represents an AI provider interface
 type Provider interface {
-	// Chat sends a chat completion request
-	Chat(ctx context.Context, req *ChatRequest) (*ChatResponse, error)
-
 	// ChatStream sends a streaming chat completion request
 	ChatStream(ctx context.Context, req *ChatRequest) (<-chan StreamResponse, error)
 
